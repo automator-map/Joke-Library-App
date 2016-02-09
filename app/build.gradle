@@ -1,0 +1,56 @@
+apply plugin: 'com.android.application'
+
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        applicationId "com.udacity.gradle.jokesapp"
+        minSdkVersion 15
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+
+        // Added because there was an error in :add:dexDebug:
+        // "com.android.dex.DexIndexOverflowException: method ID not in [0, 0xffff]: 65536"
+        // multiDexEnabled true
+
+        // multidex support is absent prior to Android 5.0 so had to find another way. The solution was
+        // to minimize the number and the respective size of dependencies required, specially the one from
+        // Google Play Services.
+        // More details: http://android-developers.blogspot.ca/2014/12/google-play-services-and-dex-method.html
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    productFlavors {
+        free {
+            applicationId "com.udacity.gradle.jokesapp.free"
+        }
+        paid {
+            applicationId "com.udacity.gradle.jokesapp.paid"
+        }
+    }
+
+    // Added because there was a "GC Overhead Limit" Exception
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(":jokedisplay")
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    // Added for AdMob:
+    // Changed from the generic Google Play Library to the more specific one in order to reduce the
+    // total number of methods compiled.
+    freeCompile 'com.google.android.gms:play-services-ads:8.3.0'
+    compile project(path: ':backend', configuration: 'android-endpoints')
+}
